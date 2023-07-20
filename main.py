@@ -106,6 +106,24 @@ class game_ball():
         self.rect = Rect(self.x, self.y, self.ball_rad * 2, self.ball_rad * 2)
         self.speed_x = 4
         self.speed_y = -4
+        self.game_over = 0
+
+    def move(self):
+
+        # check for collision with walls
+        if self.rect.left < 0 or self.rect.right>screen_width:
+            self.speed_x *= -1
+
+        #check fot collision with top and bottom of the screen
+        if self.rect.top < 0:
+            self.speed_y *= -1
+        if self.rect.bottom < screen_height:
+            self.game_over = -1
+
+        self.rect.x += self.speed_x
+        self.rect.y += self.speed_y
+
+        return  self.game_over
 
     def draw(self):
         pygame.draw.circle(screen, paddle_col, (self.rect.x + self.ball_rad, self.rect.y + self.ball_rad) , self.ball_rad)
@@ -137,6 +155,7 @@ while run:
 
     #draw ball
     ball.draw()
+    ball.move()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
