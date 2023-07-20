@@ -22,6 +22,8 @@ paddle_outline = (100,100,100)
 # define game variables
 cols = 6
 rows = 6
+clock = pygame.time.Clock()
+fps = 60
 
 # brick wall class
 class wall():
@@ -93,6 +95,7 @@ class paddle():
 
     def draw(self):
         pygame.draw.rect(screen, paddle_col, self.rect)
+        pygame.draw.rect(screen, paddle_outline, self.rect)
 
 
 # create a wall
@@ -105,6 +108,7 @@ player_paddle = paddle()
 run = True
 while run:
 
+    clock.tick(fps)
     screen.fill(bg)
 
     # draw wall
