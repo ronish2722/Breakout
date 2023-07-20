@@ -106,9 +106,52 @@ class game_ball():
         self.rect = Rect(self.x, self.y, self.ball_rad * 2, self.ball_rad * 2)
         self.speed_x = 4
         self.speed_y = -4
+        self.speed_max= 5
         self.game_over = 0
 
     def move(self):
+        # collision threshold
+        collision_thresh = 5
+
+        #start off with the assumption that the wall is being destroyed completely
+        wall_destroyed = 1
+        row_count = 0
+        for row in wall.block:
+            item_count = 0
+            for item in row:
+                #check collision
+                if self.rect.colliderect(item[0]):
+                    #check if collision was from above
+                    if abs(self.rect.bottom - item[0].top) <collision_thresh and self.speed_y >0:
+                        self.speed_y *= -1
+                    # check if collision was from below
+                    if abs(self.rect.top - item[0].bottom) <collision_thresh and self.speed_y <0:
+                        self.speed_y *= -1
+                    # check if collision was from left
+                    if abs(self.rect.right - item[0].left) < collision_thresh and self.speed_x > 0:
+                        self.speed_x *= -1
+                    # check if collision was from right
+                    if abs(self.rect.left - item[0].right) < collision_thresh and self.speed_x < 0:
+                        self.speed_x *= -1
+                    # reduce the block strength by doing damage to it
+                    if wall.block[row_count][item_count][1] > 1:
+                        wall.block[row_count][item_count][1] -= 1
+                    else:
+                        wall.block[row_count][item_count][0] = (0, 0, 0, 0)
+
+                #check if block still exists in which case the wall is not destroyed
+                if wall.block[row_count][item_count][0] != (0, 0, 0, 0):
+                    wall_destroyed = 0
+
+                #increase the item counter
+                item_count += 1
+
+            # increase row counter
+            row_count += 1
+
+        if wall_destroyed == 1:
+            self.game_over = 1
+
 
         # check for collision with walls
         if self.rect.left < 0 or self.rect.right>screen_width:
@@ -119,6 +162,20 @@ class game_ball():
             self.speed_y *= -1
         if self.rect.bottom < screen_height:
             self.game_over = -1
+
+        #look for collision with paddle
+        if self.rect.colliderect(player_paddle):
+            # check if colliding from the top
+            if abs(self.rect.bottom - player_paddle.rect.top) < collision_thresh and self.speed_y > 0:
+                self.speed_y *= -1
+                self.speed_x *= player_paddle.direction
+                if self.speed_x > self.speed_max:
+                    self.speed_x = self.speed_max
+                elif self.speed_x < 0 and self.speed_x < -self.speed_max:
+                    self.speed_x = -self.spped_max
+            else:
+                self.speed_x *= -1
+
 
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
